@@ -339,16 +339,27 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
 
             canvas.drawLine(bounds.centerX() - mDivWidth / 2, mDivYOffset, bounds.centerX() + mDivWidth / 2, mDivYOffset, mDivPaint);
 
+            //Have weather data?
             if(mWeatherImageBitmap != null) {
+
                 float maxWidth = mMaxPaint.measureText(mWeatherMax);
                 float minWidth = mMinPaint.measureText(mWeatherMin);
-                float totalWidth = mImageSize + mWeatherPadding + maxWidth + mWeatherPadding + minWidth;
-                float startX  = bounds.centerX() - totalWidth/2;
-                float startMax = startX + mImageSize + mWeatherPadding;
-                float startMin = startMax + maxWidth + mWeatherPadding;
-                canvas.drawBitmap(mWeatherImageBitmap, startX, mImageYOffest, null);
-                canvas.drawText(mWeatherMax, startMax, mWeatherTextOffset, mMaxPaint);
-                canvas.drawText(mWeatherMin, startMin, mWeatherTextOffset, mMinPaint);
+                if(mAmbient) {
+                    float totalWidth = maxWidth + mWeatherPadding + minWidth;
+                    float startMax = bounds.centerX() - totalWidth/2;
+                    float startMin = startMax + maxWidth + mWeatherPadding;
+                    canvas.drawText(mWeatherMax, startMax, mWeatherTextOffset, mMaxPaint);
+                    canvas.drawText(mWeatherMin, startMin, mWeatherTextOffset, mMinPaint);
+                } else {
+                    float totalWidth = mImageSize + mWeatherPadding + maxWidth + mWeatherPadding + minWidth;
+                    float startX  = bounds.centerX() - totalWidth/2;
+                    float startMax = startX + mImageSize + mWeatherPadding;
+                    float startMin = startMax + maxWidth + mWeatherPadding;
+                    canvas.drawBitmap(mWeatherImageBitmap, startX, mImageYOffest, null);
+                    canvas.drawText(mWeatherMax, startMax, mWeatherTextOffset, mMaxPaint);
+                    canvas.drawText(mWeatherMin, startMin, mWeatherTextOffset, mMinPaint);
+                }
+
             }
         }
 
