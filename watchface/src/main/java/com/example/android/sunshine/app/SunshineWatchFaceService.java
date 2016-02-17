@@ -32,11 +32,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
-import android.util.Log;
 import android.view.SurfaceHolder;
-import android.view.WindowInsets;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -75,7 +74,6 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
      */
     private static final int MSG_UPDATE_TIME = 0;
 
-    private static final String TAG = SunshineWatchFaceService.class.getSimpleName();
 
     @Override
     public Engine onCreateEngine() {
@@ -129,7 +127,6 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
                 invalidate();
             }
         };
-        int mTapCount;
 
         float mTimeYOffset;
         float mDateYOffset;
@@ -152,7 +149,6 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onCreate(SurfaceHolder holder) {
             super.onCreate(holder);
-            Log.d(TAG, "onCreate()");
             mGoogleApiClient = new GoogleApiClient.Builder(SunshineWatchFaceService.this)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
@@ -176,20 +172,23 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
             mWeatherTextOffset = resources.getDimension(R.dimen.weather_text_y_offest);
 
             mBackgroundPaint = new Paint();
+            //noinspection deprecation
             mBackgroundPaint.setColor(resources.getColor(R.color.background));
-
+            //noinspection deprecation
             mTimeTextPaint = createTextPaint(resources.getColor(R.color.time_text));
             mTimeTextPaint.setTextSize(resources.getDimension(R.dimen.time_text_size));
-
+            //noinspection deprecation
             mDateTextPaint = createTextPaint(resources.getColor(R.color.date_text));
             mDateTextPaint.setTextSize(resources.getDimension(R.dimen.date_text_size));
 
             mDivPaint = new Paint();
+            //noinspection deprecation
             mDivPaint.setColor(resources.getColor(R.color.divider));
             mDivPaint.setStrokeWidth(resources.getDimension(R.dimen.divider_stroke));
-
+            //noinspection deprecation
             mMaxPaint = createTextPaint(resources.getColor(R.color.time_text));
             mMaxPaint.setTextSize(resources.getDimension(R.dimen.weather_text_size));
+            //noinspection deprecation
             mMinPaint = createTextPaint(resources.getColor(R.color.date_text));
             mMinPaint.setTextSize(resources.getDimension(R.dimen.weather_text_size));
 
@@ -220,7 +219,6 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onVisibilityChanged(boolean visible) {
             super.onVisibilityChanged(visible);
-            Log.d(TAG, "onVisibilityChanged: " + visible);
             if (visible) {
                 mGoogleApiClient.connect();
                 registerReceiver();
@@ -258,11 +256,6 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
             SunshineWatchFaceService.this.unregisterReceiver(mTimeZoneReceiver);
         }
 
-        @Override
-        public void onApplyWindowInsets(WindowInsets insets) {
-            super.onApplyWindowInsets(insets);
-
-        }
 
         @Override
         public void onPropertiesChanged(Bundle properties) {
@@ -284,6 +277,8 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
                 if (mLowBitAmbient) {
                     mTimeTextPaint.setAntiAlias(!inAmbientMode);
                     mDateTextPaint.setAntiAlias(!inAmbientMode);
+                    mMaxPaint.setAntiAlias(!inAmbientMode);
+                    mMinPaint.setAntiAlias(!inAmbientMode);
                 }
                 invalidate();
             }
@@ -293,29 +288,6 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
             updateTimer();
         }
 
-        /**
-         * Captures tap event (and tap type) and toggles the background color if the user finishes
-         * a tap.
-         */
-        @Override
-        public void onTapCommand(int tapType, int x, int y, long eventTime) {
-            Resources resources = SunshineWatchFaceService.this.getResources();
-            switch (tapType) {
-                case TAP_TYPE_TOUCH:
-                    // The user has started touching the screen.
-                    break;
-                case TAP_TYPE_TOUCH_CANCEL:
-                    // The user has started a different gesture or otherwise cancelled the tap.
-                    break;
-                case TAP_TYPE_TAP:
-                    // The user has completed the tap gesture.
-                    mTapCount++;
-                    mBackgroundPaint.setColor(resources.getColor(mTapCount % 2 == 0 ?
-                            R.color.background : R.color.background2));
-                    break;
-            }
-            invalidate();
-        }
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
@@ -398,9 +370,10 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
         private void updateUiForConfigDataMap(DataMap config) {
             Resources resources = SunshineWatchFaceService.this.getResources();
             Drawable imageDrawable = resources.getDrawable(SunshineWatchFaceUtil.getArtResourceForWeatherCondition(config.getInt("id")), null);
-            Bitmap bm = ((BitmapDrawable) imageDrawable).getBitmap();
-            int size = resources.getDimensionPixelSize(R.dimen.image_size);
-            mWeatherImageBitmap = Bitmap.createScaledBitmap(bm, mImageSize, mImageSize, true);
+            if(imageDrawable != null) {
+                Bitmap bm = ((BitmapDrawable) imageDrawable).getBitmap();
+                mWeatherImageBitmap = Bitmap.createScaledBitmap(bm, mImageSize, mImageSize, true);
+            }
             mWeatherMax = config.getString("max");
             mWeatherMin = config.getString("min");
             invalidate();
@@ -419,7 +392,6 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
 
         @Override
         public void onDataChanged(DataEventBuffer dataEventBuffer) {
-            Log.d(TAG, "onDataChanged");
             for (DataEvent dataEvent : dataEventBuffer) {
                 if (dataEvent.getType() != DataEvent.TYPE_CHANGED) {
                     continue;
@@ -439,21 +411,18 @@ public class SunshineWatchFaceService extends CanvasWatchFaceService {
 
         @Override
         public void onConnected(Bundle bundle) {
-            Log.d(TAG, "onConnected");
             Wearable.DataApi.addListener(mGoogleApiClient, Engine.this);
             updateUiOnStartup();
         }
 
         @Override
         public void onConnectionSuspended(int i) {
-            Log.d(TAG, "onConnectionSuspended: " + i);
         }
 
 
 
         @Override
-        public void onConnectionFailed(ConnectionResult connectionResult) {
-            Log.d(TAG, "onConnectionFailed");
+        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         }
     }
 }

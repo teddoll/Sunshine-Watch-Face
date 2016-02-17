@@ -19,6 +19,7 @@ import java.util.List;
 
 /**
  * Created by teddydoll on 2/14/16.
+ * Util for Wathcface service.
  */
 public class SunshineWatchFaceUtil {
 
@@ -33,7 +34,7 @@ public class SunshineWatchFaceUtil {
         }
 
         @Override
-        public void onResult(DataApi.DataItemResult dataItemResult) {
+        public void onResult(@NonNull DataApi.DataItemResult dataItemResult) {
             if (dataItemResult.getStatus().isSuccess()) {
                 if (dataItemResult.getDataItem() != null) {
                     DataItem configDataItem = dataItemResult.getDataItem();
@@ -97,21 +98,6 @@ public class SunshineWatchFaceUtil {
      */
     public static void fetchConfigDataMap(final GoogleApiClient client,
                                           final FetchConfigDataMapCallback callback) {
-//        Log.d("fetchConfigDataMap", "fetchConfigDataMap");
-//        PendingResult<DataItemBuffer> results = Wearable.DataApi.getDataItems(client);
-//        results.setResultCallback(new ResultCallback<DataItemBuffer>() {
-//            @Override
-//            public void onResult(@NonNull DataItemBuffer dataItems) {
-//                Log.d("fetchConfigDataMap", "onResult " + dataItems );
-//                for (DataItem dataItem : dataItems) {
-//                    DataMapItem dataMapItem = DataMapItem.fromDataItem(dataItem);
-//                    Log.d("fetchConfigDataMap", dataMapItem.getUri().toString() + ": " + dataMapItem.getDataMap());
-//                }
-//
-//                dataItems.release();
-//            }
-//        });
-
 
         Wearable.NodeApi.getConnectedNodes(client).setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
             @Override
